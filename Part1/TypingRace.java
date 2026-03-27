@@ -77,7 +77,8 @@ public class TypingRace
     public void startRace()
     {
         boolean finished = false;
-
+        String name = "";
+        
         // Reset all typists to the start of the passage
         // (Ty was in a hurry here)
         seat1Typist.resetToStart();
@@ -96,7 +97,18 @@ public class TypingRace
             // Check if any typist has finished the passage
             if ( raceFinishedBy(seat1Typist) || raceFinishedBy(seat2Typist) || raceFinishedBy(seat3Typist) )
             {
-                finished = true;
+                if (raceFinishedBy(seat1Typist)){
+                    finished = true;
+                    name = seat1Typist.getName();
+                }
+                else if (raceFinishedBy(seat2Typist)){
+                    finished = true;
+                    name = seat2Typist.getName();
+                }
+                else if (raceFinishedBy(seat3Typist)){
+                    finished = true;
+                    name = seat3Typist.getName();
+                }
             }
 
             // Wait 200ms between turns so the animation is visible
@@ -106,6 +118,10 @@ public class TypingRace
         }
 
         // TODO (Task 2a): Print the winner's name here
+        System.out.println("\n\n");
+        System.out.println("====================================================");
+        System.out.println("And the winner is... " + name + "!");
+        System.out.println("====================================================");
     }
 
     /**
