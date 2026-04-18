@@ -87,13 +87,22 @@ public class TypingRace
 
         while (!finished)
         {
+            int[] arr = new int[3];
+            arr[0] = seat1Typist.getProgress();
+            arr[1] = seat2Typist.getProgress();
+            arr[2] = seat3Typist.getProgress();
+
             // Advance each typist by one turn
             advanceTypist(seat1Typist);
             advanceTypist(seat2Typist);
             advanceTypist(seat3Typist);
-
+            
+            boolean m1 = seat1Typist.getProgress() < arr[0];
+            boolean m2 = seat2Typist.getProgress() < arr[1];
+            boolean m3 = seat3Typist.getProgress() < arr[2];
+            
             // Print the current state of the race
-            printRace();
+            printRace(m1, m2, m3);
 
             // Check if any typist has finished the passage
             if ( raceFinishedBy(seat1Typist) || raceFinishedBy(seat2Typist) || raceFinishedBy(seat3Typist) )
@@ -191,7 +200,7 @@ public class TypingRace
      * Shows each typist's position along the passage, burnout state,
      * and a WPM estimate based on current progress.
      */
-    private void printRace()
+    private void printRace(boolean m1, boolean m2, boolean m3)
     {
         System.out.print('\u000C'); // Clear terminal
 
@@ -199,13 +208,13 @@ public class TypingRace
         multiplePrint('=', passageLength + 3);
         System.out.println();
 
-        printSeat(seat1Typist);
+        printSeat(seat1Typist, m1);
         System.out.println();
 
-        printSeat(seat2Typist);
+        printSeat(seat2Typist, m2);
         System.out.println();
 
-        printSeat(seat3Typist);
+        printSeat(seat3Typist, m3);
         System.out.println();
 
         multiplePrint('=', passageLength + 3);
@@ -225,7 +234,7 @@ public class TypingRace
      *
      * @param theTypist the typist whose lane to print
      */
-    private void printSeat(Typist theTypist)
+    private void printSeat(Typist theTypist, boolean mistyped)
     {
         int spacesBefore = theTypist.getProgress();
         int spacesAfter  = passageLength - theTypist.getProgress();
@@ -240,6 +249,12 @@ public class TypingRace
         {
             System.out.print('~');
             spacesAfter--; // symbol + ~ together take two characters
+        }
+
+        if (mistyped)
+        {
+            System.out.print("[<]");
+            spacesAfter -= 3;
         }
 
         multiplePrint(' ', spacesAfter);
