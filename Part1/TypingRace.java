@@ -1,5 +1,6 @@
 import java.util.concurrent.TimeUnit;
 import java.lang.Math;
+import java.util.Scanner;
 
 /**
  * A typing race simulation. Three typists race to complete a passage of text,
@@ -273,5 +274,36 @@ public class TypingRace
             System.out.print(aChar);
             i = i + 1;
         }
+    }
+
+    /**
+     * Main Method to run the Typing Race game.
+     */
+
+    public static void main(String[] args) 
+    {
+        // Var declarations
+        Scanner in = new Scanner(System.in);
+
+        System.out.println("Welcome to the Typing Race!");
+        System.out.println("Press specify the passage length");
+        int passageLength = in.nextInt();
+
+        TypingRace race = new TypingRace(passageLength);
+
+        // Specify player avatar and name + base accuracy
+        Typist t1 = new Typist('①', "TURBOFINGERS", 0.85);
+        Typist t2 = new Typist('②', "QWERTY_QUEEN", 0.60);
+        Typist t3 = new Typist('③', "HUNT_N_PECK", 0.30);
+
+        race.addTypist(t1, 1);
+        race.addTypist(t2, 2);
+        race.addTypist(t3, 3);
+
+        // Invoke the main start function
+        race.startRace();
+
+        // Close the scanner 
+        in.close();
     }
 }
