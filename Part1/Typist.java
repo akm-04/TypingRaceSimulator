@@ -60,6 +60,14 @@ public class Typist
     {
         this.isBurntOut = true;
         this.burnoutTurnsRemaining = turns;
+
+        // Decrease accuracy by 0.01, but not below 0.1.
+        double newAccuracy = this.getAccuracy() - 0.01;
+        if (newAccuracy < 0.1) {
+            this.setAccuracy(0.1);
+        } else {
+            this.setAccuracy(newAccuracy);
+        }
     }
 
     /**
