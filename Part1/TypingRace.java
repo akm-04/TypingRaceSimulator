@@ -275,14 +275,16 @@ public class TypingRace
         // Print name and accuracy
         if (theTypist.isBurntOut())
         {
-            System.out.print(theTypist.getName()
-                + " (Accuracy: " + theTypist.getAccuracy() + ")"
-                + " BURNT OUT (" + theTypist.getBurnoutTurnsRemaining() + " turns)");
+            System.out.printf("%s (Accuracy: %.2f) BURNT OUT (%d turns)",
+                theTypist.getName(),
+                theTypist.getAccuracy(),
+                theTypist.getBurnoutTurnsRemaining());
         }
         else
         {
-            System.out.print(theTypist.getName()
-                + " (Accuracy: " + theTypist.getAccuracy() + ")");
+            System.out.printf("%s (Accuracy: %.2f)",
+                theTypist.getName(),
+                theTypist.getAccuracy());
         }
     }
 
