@@ -78,7 +78,7 @@ public class TypingRace
     public void startRace()
     {
         boolean finished = false;
-        String name = "";
+        Typist winner = null;
         
         // Reset all typists to the start of the passage
         // (Ty was in a hurry here)
@@ -112,15 +112,15 @@ public class TypingRace
             {
                 if (raceFinishedBy(seat1Typist)){
                     finished = true;
-                    name = seat1Typist.getName();
+                    winner = seat1Typist;
                 }
                 else if (raceFinishedBy(seat2Typist)){
                     finished = true;
-                    name = seat2Typist.getName();
+                    winner = seat2Typist;
                 }
                 else if (raceFinishedBy(seat3Typist)){
                     finished = true;
-                    name = seat3Typist.getName();
+                    winner = seat3Typist;
                 }
             }
 
@@ -129,11 +129,19 @@ public class TypingRace
                 TimeUnit.MILLISECONDS.sleep(200);
             } catch (Exception e) {}
         }
+        
+        // Handle winner's accuracy
+        double oldAccuracy = winner.getAccuracy();
+        winner.setAccuracy(oldAccuracy + 0.02);
+        
+        // Now if needed we can do anything with winner object. 
+        // eg: create a leaderboard of winner object.
 
-        // TODO (Task 2a): Print the winner's name here
+        // Print winner banner
         System.out.println("\n\n");
         System.out.println("====================================================");
-        System.out.println("And the winner is... " + name + "!");
+        System.out.println("And the winner is... " + winner.getName() + "!");
+        System.out.printf("Final accuracy: %.2f (improved from %.2f)\n", winner.getAccuracy(), oldAccuracy);
         System.out.println("====================================================");
     }
 
