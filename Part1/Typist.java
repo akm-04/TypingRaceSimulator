@@ -40,7 +40,7 @@ public class Typist
     {
         this.typistSymbol = typistSymbol;
         this.typistName = typistName;
-        this.typistAccuracy = typistAccuracy;
+        setAccuracy(typistAccuracy);
         this.progress = 0;
         this.isBurntOut = false;
         this.burnoutTurnsRemaining = 0;
