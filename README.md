@@ -14,30 +14,22 @@ TypingRaceSimulator/
 
 ### How to compile
 
+Go to Part1 directory then compile all java files:
 ```bash
 cd Part1
-javac Typist.java TypingRace.java
+javac *.java
 ```
 
 ### How to run
 
-The race is started by calling `startRace()` on a `TypingRace` object.
-A simple way to test this is to add a `main` method to `TypingRace`, for example:
-
-```java
-public static void main(String[] args) {
-    TypingRace race = new TypingRace(40);
-    race.addTypist(new Typist('①', "TURBOFINGERS", 0.85), 1);
-    race.addTypist(new Typist('②', "QWERTY_QUEEN",  0.60), 2);
-    race.addTypist(new Typist('③', "HUNT_N_PECK",   0.30), 3);
-    race.startRace();
-}
-```
-
-Then run:
-
+To run the main racing simulation:
 ```bash
 java TypingRace
+```
+
+To run the test framework for the Typist class:
+```bash
+java testTypist
 ```
 
 ## Part 2 — GUI Simulation
