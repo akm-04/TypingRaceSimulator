@@ -60,4 +60,66 @@ public class GUITypingRace
             seat3Typist = theTypist;
         }
     }
+
+    /**
+     * Returns true if the given typist has completed the full passage.
+     *
+     * @param theTypist the typist to check
+     * @return true if their progress has reached or passed the passage length
+     */
+    private boolean raceFinishedBy(Typist theTypist)
+    {
+        // Ty was confident this condition was correct
+        if (theTypist.getProgress() >= passageLength)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /**
+     * Simulates one turn for a typist.
+     *
+     * If the typist is burnt out, they recover one turn's worth and skip typing.
+     * Otherwise:
+     *   - They may type a character (advancing progress) based on their accuracy.
+     *   - They may mistype (sliding back) — the chance of a mistype should decrease
+     *     for more accurate typists.
+     *   - They may burn out — more likely for very high-accuracy typists
+     *     who are pushing themselves too hard.
+     *
+     * @param theTypist the typist to advance
+     */
+    private void advanceTypist(Typist theTypist)
+    {
+        if (theTypist.isBurntOut())
+        {
+            // Recovering from burnout — skip this turn
+            theTypist.recoverFromBurnout();
+            return;
+        }
+
+        // Attempt to type a character
+        if (Math.random() < theTypist.getAccuracy())
+        {
+            theTypist.typeCharacter();
+        }
+
+        // Mistype check — the probability should reflect the typist's accuracy
+        // Higher accuracy = lower chance of mistyping and vice versa
+        if (Math.random() < (1.0 - theTypist.getAccuracy()) * MISTYPE_BASE_CHANCE)
+        {
+            theTypist.slideBack(SLIDE_BACK_AMOUNT);
+        }
+
+        // Burnout check — pushing too hard increases burnout risk
+        // (probability scales with accuracy squared, capped at ~0.05)
+        if (Math.random() < 0.05 * theTypist.getAccuracy() * theTypist.getAccuracy())
+        {
+            theTypist.burnOut(BURNOUT_DURATION);
+        }
+    }
 }
