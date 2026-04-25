@@ -228,7 +228,12 @@ public class GUITypingRace
             winner.getName(), winner.getAccuracy(), oldAccuracy);
         
         JOptionPane.showMessageDialog(frame, message, "Race Finished", JOptionPane.INFORMATION_MESSAGE);
-        startButton.setText("Race Over");
+
+        startButton.setText("Restart Race");
+        startButton.setEnabled(true);
+        shortBtn.setEnabled(true);
+        midBtn.setEnabled(true);
+        longBtn.setEnabled(true);
     }
     
     /**
