@@ -265,4 +265,21 @@ public class GUITypingRace
             theTypist.burnOut(BURNOUT_DURATION);
         }
     }
+
+    /**
+     * Main Method
+     */
+     public static void main(String[] paramcb)
+     {
+        
+        GUITypingRace race = new GUITypingRace(40);
+        
+        // Add typists
+        race.addTypist(new Typist('①', "TURBOFINGERS", 0.95), 1);
+        race.addTypist(new Typist('②', "SPEED DEMON", 0.82), 2);
+        race.addTypist(new Typist('③', "ACCURACY ACE", 0.99), 3);
+
+        race.startRaceGUI();
+    }
+
 }
