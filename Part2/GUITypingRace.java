@@ -9,9 +9,8 @@ import java.lang.Math;
 public class GUITypingRace 
 {
     private int passageLength;   // Total characters in the passage to type
-    private Typist seat1Typist;
-    private Typist seat2Typist;
-    private Typist seat3Typist;
+    private Typist[] typists = new Typist[6];
+    private int activeTypists = 3;
 
     // Accuracy thresholds for mistype and burnout events
     // (Ty tuned these values "by feel". They may need adjustment.)
@@ -33,6 +32,9 @@ public class GUITypingRace
     private JButton startButton;
     private Timer gameTimer;
 
+    private JSlider seatSlider;
+    private JPanel centerWrapper;
+
     /**
      * Constructor for objects of class TypingRace.
      * Sets up the race with a passage of the given length.
@@ -43,9 +45,6 @@ public class GUITypingRace
     public GUITypingRace(int passageLength)
     {
         this.passageLength = passageLength;
-        seat1Typist = null;
-        seat2Typist = null;
-        seat3Typist = null;
     }
 
     /**
@@ -62,7 +61,7 @@ public class GUITypingRace
         JTabbedPane tabbedPane = new JTabbedPane();
 
         // tab-1: TypingRace setup
-        JPanel raceTab = new JPanel(new GridLayout(4, 1));
+        JPanel raceTab = new JPanel(new GridLayout(6, 1));
         raceTab.add(new JLabel("Select Passage Length:", SwingConstants.CENTER));
 
         shortBtn = new JRadioButton("Short (70 chars)");
@@ -86,6 +85,14 @@ public class GUITypingRace
         raceTab.add(radioPanel2);
         raceTab.add(radioPanel3);
 
+        // Add slider to pick players
+        raceTab.add(new JLabel("Select Number of Typists for race (2-6):", SwingConstants.CENTER));
+        seatSlider = new JSlider(JSlider.HORIZONTAL, 2, 6, 3);
+        seatSlider.setMajorTickSpacing(1);
+        seatSlider.setPaintTicks(true);
+        seatSlider.setPaintLabels(true);
+        raceTab.add(seatSlider);
+
         // Tab-2 = setup Typist
         JPanel typistTab = new JPanel(new FlowLayout());
         typistTab.add(new JLabel("Typist Player Options"));
@@ -94,28 +101,13 @@ public class GUITypingRace
         tabbedPane.addTab("Typists", typistTab);
         frame.add(tabbedPane, BorderLayout.NORTH);
 
-        // center panel = Race Track
-        JPanel trackPanel = new JPanel(new GridLayout(3, 1));
-        typingFields = new JTextField[3];
-        Typist[] seatedTypists = {seat1Typist, seat2Typist, seat3Typist};
-
-        for (int i = 0; i < 3; i++) {
-            JPanel lane = new JPanel(new BorderLayout());
-            
-            // The Label showing the Typist's name and symbol
-            JLabel nameLabel = new JLabel(seatedTypists[i].getSymbol() + " " + seatedTypists[i].getName() + "  ");
-            
-            // Switch to JTextField
-            typingFields[i] = new JTextField("Waiting to start...");
-            typingFields[i].setEditable(false);
-            typingFields[i].setFont(new Font("Monospaced", Font.BOLD, 12));
-            
-            lane.add(nameLabel, BorderLayout.WEST);
-            lane.add(typingFields[i], BorderLayout.CENTER);
-            trackPanel.add(lane);
-        }
+        // center panel | build lanes dynamically
+        centerWrapper = new JPanel(new BorderLayout());
+        JLabel waitingLabel = new JLabel("Configure settings in 'Main Race' and click Start!", SwingConstants.CENTER);
+        waitingLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        centerWrapper.add(waitingLabel, BorderLayout.CENTER);
         
-        frame.add(trackPanel, BorderLayout.CENTER);
+        frame.add(centerWrapper, BorderLayout.CENTER);
 
         // BOTTOM PANEL: Start Button
         JPanel bottomPanel = new JPanel(new FlowLayout());
@@ -144,6 +136,7 @@ public class GUITypingRace
         }
 
         passageLength = currentPassage.length();
+        activeTypists = seatSlider.getValue();
 
         // Lock the inputs so user cannot interrupt game mid-race
         startButton.setEnabled(false);
@@ -151,25 +144,47 @@ public class GUITypingRace
         midBtn.setEnabled(false);
         longBtn.setEnabled(false);;
         
-        seat1Typist.resetToStart();
-        seat2Typist.resetToStart();
-        seat3Typist.resetToStart();
+        seatSlider.setEnabled(false);
 
-        for(int i = 0; i < 3; i++) {
-            typingFields[i].setText("");
+        // build track panel dynamically
+        centerWrapper.removeAll();
+        JPanel trackPanel = new JPanel(new GridLayout(activeTypists, 1));
+        typingFields = new JTextField[activeTypists];
+
+        for (int i = 0; i < activeTypists; i++) {
+            typists[i].resetToStart();
+            
+            JPanel lane = new JPanel(new BorderLayout());
+            JLabel nameLabel = new JLabel(typists[i].getSymbol() + " " + typists[i].getName() + "  ");
+            
+            typingFields[i] = new JTextField("");
+            typingFields[i].setEditable(false);
             typingFields[i].setBackground(Color.WHITE);
+            
+            lane.add(nameLabel, BorderLayout.WEST);
+            lane.add(typingFields[i], BorderLayout.CENTER);
+            trackPanel.add(lane);
         }
+        
+        centerWrapper.add(trackPanel, BorderLayout.CENTER);
+        centerWrapper.revalidate();
+        centerWrapper.repaint();
 
         // Inner class to handle the Timer ticks cleanly
         gameTimer = new Timer(150, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                advanceTypist(seat1Typist);
-                advanceTypist(seat2Typist);
-                advanceTypist(seat3Typist);
+                boolean someoneFinished = false;
+                
+                for (int i = 0; i < activeTypists; i++) {
+                    advanceTypist(typists[i]);
+                    if (raceFinishedBy(typists[i])) {
+                        someoneFinished = true;
+                    }
+                }
 
                 updateScreen();
 
-                if (raceFinishedBy(seat1Typist) || raceFinishedBy(seat2Typist) || raceFinishedBy(seat3Typist)) {
+                if (someoneFinished) {
                     gameTimer.stop(); 
                     declareWinner();
                 }
@@ -182,10 +197,9 @@ public class GUITypingRace
     // Handle GUI Updates
     private void updateScreen() 
     {
-        Typist[] seatedTypists = {seat1Typist, seat2Typist, seat3Typist};
-        
-        for (int i = 0; i < 3; i++) {
-            Typist t = seatedTypists[i];
+
+        for (int i = 0; i < activeTypists; i++) {
+            Typist t = typists[i];
 
             int p = t.getProgress();
             if (p < 0) p = 0;
@@ -211,13 +225,12 @@ public class GUITypingRace
      */
     private void declareWinner()
     {
-        Typist winner = seat1Typist;
-
-        if (raceFinishedBy(seat2Typist)) {
-            winner = seat2Typist;
-        }
-        if (raceFinishedBy(seat3Typist)) {
-            winner = seat3Typist;
+        // winner = most progress
+        Typist winner = typists[0];
+        for (int i = 1; i < activeTypists; i++) {
+            if (typists[i].getProgress() > winner.getProgress()) {
+                winner = typists[i];
+            }
         }
 
         double oldAccuracy = winner.getAccuracy();
@@ -234,6 +247,7 @@ public class GUITypingRace
         shortBtn.setEnabled(true);
         midBtn.setEnabled(true);
         longBtn.setEnabled(true);
+        seatSlider.setEnabled(true);
     }
     
     /**
@@ -244,17 +258,8 @@ public class GUITypingRace
      */
     public void addTypist(Typist theTypist, int seatNumber)
     {
-        if (seatNumber == 1)
-        {
-            seat1Typist = theTypist;
-        }
-        else if (seatNumber == 2)
-        {
-            seat2Typist = theTypist;
-        }
-        else if (seatNumber == 3)
-        {
-            seat3Typist = theTypist;
+        if (seatNumber >= 1 && seatNumber <= 6) {
+            this.typists[seatNumber - 1] = theTypist;
         }
     }
 
@@ -332,6 +337,9 @@ public class GUITypingRace
         race.addTypist(new Typist('①', "TURBOFINGERS", 0.95), 1);
         race.addTypist(new Typist('②', "SPEED DEMON", 0.82), 2);
         race.addTypist(new Typist('③', "ACCURACY ACE", 0.99), 3);
+        race.addTypist(new Typist('④', "Chae Hae In", 0.70), 4);
+        race.addTypist(new Typist('⑤', "SUNG JingWoo", 0.88), 5);
+        race.addTypist(new Typist('⑥', "Judo Sloth", 0.40), 6);
 
         race.startRaceGUI();
     }
