@@ -21,8 +21,10 @@ public class GUITypingRace
 
     // GUI components
     private JFrame frame;
+    private JTextField lengthField;
     private JButton startButton;
     private Timer gameTimer;
+    private JProgressBar[] progressBars;
 
     /**
      * Constructor for objects of class TypingRace.
@@ -39,6 +41,147 @@ public class GUITypingRace
         seat3Typist = null;
     }
 
+    /**
+     * Builds the graphical window and sets up the race track.
+     */
+    public void startRaceGUI() 
+    {
+        frame = new JFrame("Typing Race Simulator");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(1000, 700);
+        frame.setLayout(new BorderLayout());
+
+        JPanel topPanel = new JPanel(new FlowLayout());
+        topPanel.add(new JLabel("Enter Passage Length:"));
+
+        lengthField = new JTextField("40", 5);
+        topPanel.add(lengthField);
+
+        frame.add(topPanel, BorderLayout.NORTH);
+
+        // centre panel: Race Track
+        JPanel trackPanel = new JPanel(new GridLayout(3, 1));
+
+        progressBars = new JProgressBar[3];
+        Typist[] seatedTypists = {seat1Typist, seat2Typist, seat3Typist};
+
+        for (int i = 0; i < 3; i++) {
+            JPanel lane = new JPanel(new BorderLayout());
+            
+            // The Label showing the Typist's name and symbol
+            JLabel nameLabel = new JLabel(seatedTypists[i].getSymbol() + " " + seatedTypists[i].getName() + "  ");
+            
+            // The progress bar
+            progressBars[i] = new JProgressBar();
+            progressBars[i].setStringPainted(true);
+            progressBars[i].setString("Ready to start");
+
+            lane.add(nameLabel, BorderLayout.WEST);
+            lane.add(progressBars[i], BorderLayout.CENTER);
+            trackPanel.add(lane);
+        }
+        
+        frame.add(trackPanel, BorderLayout.CENTER);
+
+        // BOTTOM PANEL: Start Button
+        JPanel bottomPanel = new JPanel(new FlowLayout());
+        startButton = new JButton("Start Race");
+        bottomPanel.add(startButton);
+        frame.add(bottomPanel, BorderLayout.SOUTH);
+        
+        // Wire it up
+        startButton.addActionListener(e -> runRace());
+        frame.setVisible(true);
+    }
+
+    /**
+     * Convert the while loop of startRaceinto GUI equivalent
+     */
+    private void runRace() 
+    {
+
+        try {
+            passageLength = Integer.parseInt(lengthField.getText());
+            if (passageLength <= 0) passageLength = 40;
+        } catch (NumberFormatException e) {
+            passageLength = 40;
+            lengthField.setText("40"); // Reset if they typed letters
+        }
+        for (int i = 0; i < 3; i++) {
+            progressBars[i].setMaximum(passageLength);
+        }
+
+        // Lock the inputs so user cannot interrupt game mid-race
+        startButton.setEnabled(false);
+        lengthField.setEditable(false);
+        
+        seat1Typist.resetToStart();
+        seat2Typist.resetToStart();
+        seat3Typist.resetToStart();
+
+        // Inner class to handle the Timer ticks cleanly
+        gameTimer = new Timer(150, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                advanceTypist(seat1Typist);
+                advanceTypist(seat2Typist);
+                advanceTypist(seat3Typist);
+
+                updateScreen();
+
+                if (raceFinishedBy(seat1Typist) || raceFinishedBy(seat2Typist) || raceFinishedBy(seat3Typist)) {
+                    gameTimer.stop(); 
+                    declareWinner();
+                }
+            }
+        });
+
+        gameTimer.start(); 
+    }
+
+    // Handle GUI Updates
+    private void updateScreen() 
+    {
+        Typist[] seatedTypists = {seat1Typist, seat2Typist, seat3Typist};
+        
+        for (int i = 0; i < 3; i++) {
+            Typist t = seatedTypists[i];
+            progressBars[i].setValue(t.getProgress());
+            
+            if (t.isBurntOut()) {
+                progressBars[i].setString("BURNT OUT (" + t.getBurnoutTurnsRemaining() + " turns)");
+                progressBars[i].setForeground(Color.RED); 
+            } else {
+                progressBars[i].setString(t.getProgress() + " / " + passageLength);
+                progressBars[i].setForeground(UIManager.getColor("ProgressBar.foreground")); 
+            }
+        }
+    }
+
+    /**
+     * Port of Print Banner of startRace
+     */
+    private void declareWinner()
+    {
+        Typist winner = seat1Typist;
+
+        if (raceFinishedBy(seat2Typist)) {
+            winner = seat2Typist;
+        }
+        if (raceFinishedBy(seat3Typist)) {
+            winner = seat3Typist;
+        }
+
+        double oldAccuracy = winner.getAccuracy();
+        winner.setAccuracy(oldAccuracy + 0.02);
+
+        // Banner
+        String message = String.format("%s WINS!\nFinal Accuracy: %.2f (improved from %.2f)", 
+            winner.getName(), winner.getAccuracy(), oldAccuracy);
+        
+        JOptionPane.showMessageDialog(frame, message, "Race Finished", JOptionPane.INFORMATION_MESSAGE);
+        startButton.setText("Race Over");
+    }
+    
     /**
      * Seats a typist at the given seat number (1, 2, or 3).
      *
