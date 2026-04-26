@@ -91,7 +91,9 @@ public class GUITypingRace
         seatSlider.setMajorTickSpacing(1);
         seatSlider.setPaintTicks(true);
         seatSlider.setPaintLabels(true);
-        raceTab.add(seatSlider);
+        JPanel sliderPanel = new JPanel(new FlowLayout());
+        sliderPanel.add(seatSlider);
+        raceTab.add(sliderPanel);
 
         // Tab-2 = setup Typist
         JPanel typistTab = new JPanel(new FlowLayout());
