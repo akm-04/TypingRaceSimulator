@@ -26,6 +26,11 @@ public class GUITypingRace
     private String currentPassage;
     private JRadioButton shortBtn, midBtn, longBtn;
 
+    // modifiers
+    private JCheckBox autoCorrectBox, caffeineBox, nightShiftBox;
+    private boolean isAutocorrect, isCaffeine, isNightShift;
+    private int currentTurn;
+
     // GUI components
     private JFrame frame;
     private JTextField[] typingFields;
@@ -61,7 +66,7 @@ public class GUITypingRace
         JTabbedPane tabbedPane = new JTabbedPane();
 
         // tab-1: TypingRace setup
-        JPanel raceTab = new JPanel(new GridLayout(6, 1));
+        JPanel raceTab = new JPanel(new GridLayout(8, 1));
         raceTab.add(new JLabel("Select Passage Length:", SwingConstants.CENTER));
 
         shortBtn = new JRadioButton("Short (70 chars)");
@@ -94,6 +99,19 @@ public class GUITypingRace
         JPanel sliderPanel = new JPanel(new FlowLayout());
         sliderPanel.add(seatSlider);
         raceTab.add(sliderPanel);
+
+        // Add difficulty modifier
+        raceTab.add(new JLabel("Difficulty Modifiers:", SwingConstants.CENTER));
+        
+        autoCorrectBox = new JCheckBox("Autocorrect");
+        caffeineBox = new JCheckBox("Caffeine Mode");
+        nightShiftBox = new JCheckBox("Night Shift");
+        
+        JPanel modifierPanel = new JPanel(new FlowLayout());
+        modifierPanel.add(autoCorrectBox);
+        modifierPanel.add(caffeineBox);
+        modifierPanel.add(nightShiftBox);
+        raceTab.add(modifierPanel);
 
         // Tab-2 = setup Typist
         JPanel typistTab = new JPanel(new FlowLayout());
@@ -140,6 +158,12 @@ public class GUITypingRace
         passageLength = currentPassage.length();
         activeTypists = seatSlider.getValue();
 
+        // modifiers
+        isAutocorrect = autoCorrectBox.isSelected();
+        isCaffeine = caffeineBox.isSelected();
+        isNightShift = nightShiftBox.isSelected();
+        currentTurn = 0; // Reset count for caffeine mod
+
         // Lock the inputs so user cannot interrupt game mid-race
         startButton.setEnabled(false);
         shortBtn.setEnabled(false);
@@ -147,7 +171,9 @@ public class GUITypingRace
         longBtn.setEnabled(false);;
         
         seatSlider.setEnabled(false);
-
+        autoCorrectBox.setEnabled(false);
+        caffeineBox.setEnabled(false);
+        nightShiftBox.setEnabled(false);
         // build track panel dynamically
         centerWrapper.removeAll();
         JPanel trackPanel = new JPanel(new GridLayout(activeTypists, 1));
@@ -176,7 +202,8 @@ public class GUITypingRace
         gameTimer = new Timer(150, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 boolean someoneFinished = false;
-                
+                currentTurn++; // Track cafferin count
+
                 for (int i = 0; i < activeTypists; i++) {
                     advanceTypist(typists[i]);
                     if (raceFinishedBy(typists[i])) {
@@ -250,6 +277,9 @@ public class GUITypingRace
         midBtn.setEnabled(true);
         longBtn.setEnabled(true);
         seatSlider.setEnabled(true);
+        autoCorrectBox.setEnabled(true);
+        caffeineBox.setEnabled(true);
+        nightShiftBox.setEnabled(true);
     }
     
     /**
