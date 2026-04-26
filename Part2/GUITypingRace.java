@@ -336,22 +336,48 @@ public class GUITypingRace
             return;
         }
 
+        double realAccuracy = theTypist.getAccuracy();
+
+        if (isNightShift) {
+            realAccuracy -= 0.15;
+        }
+
+        if (isCaffeine && currentTurn <= 10) {
+            realAccuracy += 0.20;
+        }
+
+        // Make sure accuracy stays between 0.01 and 1.0
+        if (realAccuracy > 1.0) {
+            realAccuracy = 1.0;
+        } else if (realAccuracy < 0.01) {
+            realAccuracy = 0.01;
+        }
+
         // Attempt to type a character
-        if (Math.random() < theTypist.getAccuracy())
+        if (Math.random() < realAccuracy)
         {
             theTypist.typeCharacter();
         }
 
         // Mistype check — the probability should reflect the typist's accuracy
         // Higher accuracy = lower chance of mistyping and vice versa
-        if (Math.random() < (1.0 - theTypist.getAccuracy()) * MISTYPE_BASE_CHANCE)
+        if (Math.random() < (1.0 - realAccuracy) * MISTYPE_BASE_CHANCE)
         {
-            theTypist.slideBack(SLIDE_BACK_AMOUNT);
+            int tmp = SLIDE_BACK_AMOUNT;
+            if (isAutocorrect) {
+                tmp = SLIDE_BACK_AMOUNT / 2;
+            }
+            theTypist.slideBack(tmp);
+        }
+
+        double burnoutMultiplier = 0.05;
+        if (isCaffeine && currentTurn > 10) {
+            burnoutMultiplier = 0.12;
         }
 
         // Burnout check — pushing too hard increases burnout risk
         // (probability scales with accuracy squared, capped at ~0.05)
-        if (Math.random() < 0.05 * theTypist.getAccuracy() * theTypist.getAccuracy())
+        if (Math.random() < burnoutMultiplier * realAccuracy * realAccuracy)
         {
             theTypist.burnOut(BURNOUT_DURATION);
         }
