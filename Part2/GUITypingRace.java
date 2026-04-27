@@ -610,6 +610,20 @@ public class GUITypingRace
             realAccuracy += 0.20;
         }
 
+        // Accesory: Noise cancelling headphones
+        if (headphonesBoxes[seat].isSelected()) {
+            mistypeMultiplier -= 0.15;
+        }
+
+        // Energy drink
+        if (energyDrinkBoxes[seat].isSelected()) {
+            if (theTypist.getProgress() < passageLength / 2) {
+                realAccuracy += 0.15;
+            } else {
+                realAccuracy -= 0.15;
+            }
+        }
+
         // Make sure accuracy stays between 0.01 and 1.0
         if (realAccuracy > 1.0) {
             realAccuracy = 1.0;
@@ -642,7 +656,13 @@ public class GUITypingRace
         // (probability scales with accuracy squared, capped at ~0.05)
         if (Math.random() < burnoutMultiplier * realAccuracy * realAccuracy)
         {
-            theTypist.burnOut(BURNOUT_DURATION);
+            // Wrist support
+            int currentBurnoutDuration = BURNOUT_DURATION;
+            if (wristSupportBoxes[seat].isSelected()) {
+                currentBurnoutDuration = 1;
+            }
+
+            theTypist.burnOut(currentBurnoutDuration);
         }
     }
 
