@@ -24,7 +24,8 @@ public class GUITypingRace
     private static final String LONG_TEXT = "Java Swing is a lightweight graphical user interface toolkit that includes a rich set of widgets. It is part of the Java Foundation Classes and provides a native look and feel across different operating systems.";
     
     private String currentPassage;
-    private JRadioButton shortBtn, midBtn, longBtn;
+    private JRadioButton shortBtn, midBtn, longBtn, customBtn;
+    private JTextField customInputField;
 
     // modifiers
     private JCheckBox autoCorrectBox, caffeineBox, nightShiftBox;
@@ -66,7 +67,7 @@ public class GUITypingRace
         JTabbedPane tabbedPane = new JTabbedPane();
 
         // tab-1: TypingRace setup
-        JPanel raceTab = new JPanel(new GridLayout(8, 1));
+        JPanel raceTab = new JPanel(new GridLayout(9, 1));
         raceTab.add(new JLabel("Select Passage Length:", SwingConstants.CENTER));
 
         shortBtn = new JRadioButton("Short (70 chars)");
@@ -74,10 +75,14 @@ public class GUITypingRace
         longBtn = new JRadioButton("Long (200 chars)");
         midBtn.setSelected(true); // Default selection
 
+        customBtn = new JRadioButton("Custom:");
+        customInputField = new JTextField("", 25);
+
         ButtonGroup lengthGroup = new ButtonGroup();
         lengthGroup.add(shortBtn);
         lengthGroup.add(midBtn);
         lengthGroup.add(longBtn);
+        lengthGroup.add(customBtn);
 
         JPanel radioPanel1 = new JPanel(new FlowLayout());
         radioPanel1.add(shortBtn);
@@ -86,9 +91,14 @@ public class GUITypingRace
         JPanel radioPanel3 = new JPanel(new FlowLayout());
         radioPanel3.add(longBtn);
 
+        JPanel radioPanel4 = new JPanel(new FlowLayout());
+        radioPanel4.add(customBtn);
+        radioPanel4.add(customInputField);
+
         raceTab.add(radioPanel1);
         raceTab.add(radioPanel2);
         raceTab.add(radioPanel3);
+        raceTab.add(radioPanel4);
 
         // Add slider to pick players
         raceTab.add(new JLabel("Select Number of Typists for race (2-6):", SwingConstants.CENTER));
@@ -153,7 +163,15 @@ public class GUITypingRace
             currentPassage = MID_TEXT;
         } else if (longBtn.isSelected()) {
             currentPassage = LONG_TEXT;
+        } else if (customBtn.isSelected()) {
+            currentPassage = customInputField.getText();
+            // if user leaves it empty, fallback to default.
+            if (currentPassage.trim().isEmpty()) {
+                currentPassage = SHORT_TEXT;
+            }
         }
+
+        passageLength = currentPassage.length();
 
         passageLength = currentPassage.length();
         activeTypists = seatSlider.getValue();
@@ -169,6 +187,8 @@ public class GUITypingRace
         shortBtn.setEnabled(false);
         midBtn.setEnabled(false);
         longBtn.setEnabled(false);;
+        customBtn.setEnabled(false);
+        customInputField.setEnabled(false);
         
         seatSlider.setEnabled(false);
         autoCorrectBox.setEnabled(false);
@@ -276,6 +296,8 @@ public class GUITypingRace
         shortBtn.setEnabled(true);
         midBtn.setEnabled(true);
         longBtn.setEnabled(true);
+        customBtn.setEnabled(true);
+        customInputField.setEnabled(true);
         seatSlider.setEnabled(true);
         autoCorrectBox.setEnabled(true);
         caffeineBox.setEnabled(true);
