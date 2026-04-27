@@ -500,6 +500,22 @@ public class GUITypingRace
             burnoutMultiplier = 0.0;   // Never burns out as not typing.
         }
 
+        String selectedKeyboard = (String) keyboardBoxes[seat].getSelectedItem();
+        
+        // KB_1 is membrane which provides no buff.
+        if (KB_2.equals(selectedKeyboard)) {
+            realAccuracy += 0.05;       // speeds them up
+            mistypeMultiplier -= 0.10;  // reduces typos
+        } 
+        else if (KB_3.equals(selectedKeyboard)) {
+            realAccuracy -= 0.05;       // slows them down
+            mistypeMultiplier += 0.20;  // increases typos
+        } 
+        else if (KB_4.equals(selectedKeyboard)) {
+            realAccuracy += 0.30;       // Incredible speed
+            mistypeMultiplier += 0.50;  // High risk of making major typos
+        }
+
         if (isNightShift) {
             realAccuracy -= 0.15;
         }
