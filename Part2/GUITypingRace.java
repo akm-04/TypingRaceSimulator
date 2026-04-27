@@ -131,10 +131,12 @@ public class GUITypingRace
         styleBoxes = new JComboBox[6];
         styleImpactLabels = new JLabel[6];
         String[] styles = {"Touch Typist", "Hunt & Peck", "Phone Thumbs", "Voice-to-Text"};
-        
+        JPanel[] playerPanels = new JPanel[6]; // array to hold panels. Add/ remove panels using changelistener
+
         for (int i = 0; i < 6; i++) {
             JPanel playerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-            
+            playerPanels[i] = playerPanel;
+
             playerPanel.add(new JLabel("Typing Style:"));
             styleBoxes[i] = new JComboBox<>(styles);
             playerPanel.add(styleBoxes[i]);
@@ -158,8 +160,21 @@ public class GUITypingRace
                 }
             });
 
-            typistTab.addTab("Player " + (i + 1), playerPanel);
+            // Default value of slider is 3. so initially add 3 tab 
+            if (i < 3) {
+                typistTab.addTab("Player " + (i + 1), playerPanels[i]);
+            }
         }
+
+        // Listen to slider to sync
+        seatSlider.addChangeListener(e -> {
+            int activeCount = seatSlider.getValue();
+            typistTab.removeAll(); // Clear current tabs
+                for (int i = 0; i < activeCount; i++) {
+                    typistTab.addTab("Player " + (i + 1), playerPanels[i]); // Re-add the exact number needed
+                }
+            }
+        );
 
         tabbedPane.addTab("Main Race", raceTab);
         tabbedPane.addTab("Typists", typistTab);
