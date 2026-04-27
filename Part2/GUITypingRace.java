@@ -2,6 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.lang.Math;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Runs a GUI version of the typing race game.
@@ -52,6 +54,9 @@ public class GUITypingRace
 
     private JSlider seatSlider;
     private JPanel centerWrapper;
+
+    // Update to use a list to lock / unlock GUI configs
+    private List<JComponent> configControls = new ArrayList<>();
 
     // Typist Configuration
     private JComboBox<String>[] styleBoxes;
@@ -245,6 +250,23 @@ public class GUITypingRace
         
         // Wire it up
         startButton.addActionListener(e -> runRace());
+
+        // Add settings to list to Lock during race and unlock automatically afterwards
+        configControls.add(startButton);
+        configControls.add(shortBtn);
+        configControls.add(midBtn);
+        configControls.add(longBtn);
+        configControls.add(customBtn);
+        configControls.add(customInputField);
+        configControls.add(seatSlider);
+        configControls.add(autoCorrectBox);
+        configControls.add(caffeineBox);
+        configControls.add(nightShiftBox);
+        for (int i = 0; i < 6; i++) {
+            configControls.add(styleBoxes[i]);
+            configControls.add(keyboardBoxes[i]);
+        }
+
         frame.setVisible(true);
     }
 
@@ -281,20 +303,8 @@ public class GUITypingRace
         currentTurn = 0; // Reset count for caffeine mod
 
         // Lock the inputs so user cannot interrupt game mid-race
-        startButton.setEnabled(false);
-        shortBtn.setEnabled(false);
-        midBtn.setEnabled(false);
-        longBtn.setEnabled(false);;
-        customBtn.setEnabled(false);
-        customInputField.setEnabled(false);
-        
-        seatSlider.setEnabled(false);
-        autoCorrectBox.setEnabled(false);
-        caffeineBox.setEnabled(false);
-        nightShiftBox.setEnabled(false);
-
-        for(int i=0; i<6; i++) {
-            styleBoxes[i].setEnabled(false);
+        for (JComponent config : configControls) {
+            config.setEnabled(false);
         }
 
         // build track panel dynamically
@@ -396,19 +406,10 @@ public class GUITypingRace
         JOptionPane.showMessageDialog(frame, message, "Race Finished", JOptionPane.INFORMATION_MESSAGE);
 
         startButton.setText("Restart Race");
-        startButton.setEnabled(true);
-        shortBtn.setEnabled(true);
-        midBtn.setEnabled(true);
-        longBtn.setEnabled(true);
-        customBtn.setEnabled(true);
-        customInputField.setEnabled(true);
-        seatSlider.setEnabled(true);
-        autoCorrectBox.setEnabled(true);
-        caffeineBox.setEnabled(true);
-        nightShiftBox.setEnabled(true);
 
-        for(int i=0; i<6; i++) {
-            styleBoxes[i].setEnabled(true);
+        // Unlock all inputs dynamically
+        for (JComponent config : configControls) {
+            config.setEnabled(true);
         }
     }
     
