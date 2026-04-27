@@ -77,6 +77,11 @@ public class GUITypingRace
     private JTextField[] symbolFields;
     private JComboBox<String>[] colorBoxes;
 
+    // Accessories checkbox
+    private JCheckBox[] wristSupportBoxes;
+    private JCheckBox[] energyDrinkBoxes;
+    private JCheckBox[] headphonesBoxes;
+
     /**
      * Constructor for objects of class TypingRace.
      * Sets up the race with a passage of the given length.
@@ -171,6 +176,11 @@ public class GUITypingRace
         symbolFields = new JTextField[6];
         colorBoxes = new JComboBox[6];
 
+        // init accessory arrays
+        wristSupportBoxes = new JCheckBox[6];
+        energyDrinkBoxes = new JCheckBox[6];
+        headphonesBoxes = new JCheckBox[6];
+
         String[] styles = {STYLE_1, STYLE_2, STYLE_3, STYLE_4};
         String[] keyboards = {KB_1, KB_2, KB_3, KB_4};
         String[] colors = {COL_BLACK, COL_BLUE, COL_GREEN, COL_MAGENTA, COL_ORANGE};
@@ -209,6 +219,22 @@ public class GUITypingRace
             playerPanel.add(new JLabel(" Color:"));
             colorBoxes[i] = new JComboBox<>(colors);
             playerPanel.add(colorBoxes[i]);
+
+            // Accessories Setup and their description
+            playerPanel.add(new JLabel("   |   Accessories (hover for more info):"));
+            
+            wristSupportBoxes[i] = new JCheckBox("Wrist Support");
+            wristSupportBoxes[i].setToolTipText("Reduces burnout recovery time to a single turn (from 3).");
+            
+            energyDrinkBoxes[i] = new JCheckBox("Energy Drink");
+            energyDrinkBoxes[i].setToolTipText("Boosts accuracy for the first half of the race, but lowers it in the second half.");
+            
+            headphonesBoxes[i] = new JCheckBox("Noise-Cancelling");
+            headphonesBoxes[i].setToolTipText("Reduces the chance of making a mistype by 15%.");
+            
+            playerPanel.add(wristSupportBoxes[i]);
+            playerPanel.add(energyDrinkBoxes[i]);
+            playerPanel.add(headphonesBoxes[i]);
 
             int seatIndex = i;
             // Typist Style Descriptions
@@ -292,6 +318,9 @@ public class GUITypingRace
             configControls.add(keyboardBoxes[i]);
             configControls.add(symbolFields[i]);
             configControls.add(colorBoxes[i]);
+            configControls.add(wristSupportBoxes[i]);
+            configControls.add(energyDrinkBoxes[i]);
+            configControls.add(headphonesBoxes[i]);
         }
 
         frame.setVisible(true);
