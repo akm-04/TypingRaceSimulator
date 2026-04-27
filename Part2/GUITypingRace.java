@@ -43,7 +43,7 @@ public class GUITypingRace
 
     // Typist Configuration
     private JComboBox<String>[] styleBoxes;
-    
+    private JLabel[] styleImpactLabels; // array holds descriptions for GUI
     /**
      * Constructor for objects of class TypingRace.
      * Sets up the race with a passage of the given length.
@@ -129,6 +129,7 @@ public class GUITypingRace
         // Tab-2 = setup Typist
         JTabbedPane typistTab = new JTabbedPane();
         styleBoxes = new JComboBox[6];
+        styleImpactLabels = new JLabel[6];
         String[] styles = {"Touch Typist", "Hunt & Peck", "Phone Thumbs", "Voice-to-Text"};
         
         for (int i = 0; i < 6; i++) {
@@ -136,7 +137,27 @@ public class GUITypingRace
             
             playerPanel.add(new JLabel("Typing Style:"));
             styleBoxes[i] = new JComboBox<>(styles);
-            playerPanel.add(styleBoxes[i]);            
+            playerPanel.add(styleBoxes[i]);
+
+            // Descriptions
+            styleImpactLabels[i] = new JLabel(" (+15% Speed, Double Burnout Risk)");
+            styleImpactLabels[i].setForeground(Color.GRAY);
+            playerPanel.add(styleImpactLabels[i]);
+
+            int seatIndex = i;
+            styleBoxes[i].addActionListener(e -> {
+                String selected = (String) styleBoxes[seatIndex].getSelectedItem();
+                if ("Touch Typist".equals(selected)) {
+                    styleImpactLabels[seatIndex].setText(" (+15% Accuracy, Double Burnout Risk)");
+                } else if ("Hunt & Peck".equals(selected)) {
+                    styleImpactLabels[seatIndex].setText(" (-20% Accuracy, Almost No Burnout)");
+                } else if ("Phone Thumbs".equals(selected)) {
+                    styleImpactLabels[seatIndex].setText(" (Double Mistype Chance)");
+                } else if ("Voice-to-Text".equals(selected)) {
+                    styleImpactLabels[seatIndex].setText(" (Locked 95% Accuracy, 0 Burnout)");
+                }
+            });
+
             typistTab.addTab("Player " + (i + 1), playerPanel);
         }
 
