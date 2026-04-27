@@ -41,6 +41,9 @@ public class GUITypingRace
     private JSlider seatSlider;
     private JPanel centerWrapper;
 
+    // Typist Configuration
+    private JComboBox<String>[] styleBoxes;
+    
     /**
      * Constructor for objects of class TypingRace.
      * Sets up the race with a passage of the given length.
@@ -124,8 +127,18 @@ public class GUITypingRace
         raceTab.add(modifierPanel);
 
         // Tab-2 = setup Typist
-        JPanel typistTab = new JPanel(new FlowLayout());
-        typistTab.add(new JLabel("Typist Player Options"));
+        JTabbedPane typistTab = new JTabbedPane();
+        styleBoxes = new JComboBox[6];
+        String[] styles = {"Touch Typist", "Hunt & Peck", "Phone Thumbs", "Voice-to-Text"};
+        
+        for (int i = 0; i < 6; i++) {
+            JPanel playerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            
+            playerPanel.add(new JLabel("Typing Style:"));
+            styleBoxes[i] = new JComboBox<>(styles);
+            playerPanel.add(styleBoxes[i]);            
+            typistTab.addTab("Player " + (i + 1), playerPanel);
+        }
 
         tabbedPane.addTab("Main Race", raceTab);
         tabbedPane.addTab("Typists", typistTab);
@@ -194,6 +207,11 @@ public class GUITypingRace
         autoCorrectBox.setEnabled(false);
         caffeineBox.setEnabled(false);
         nightShiftBox.setEnabled(false);
+
+        for(int i=0; i<6; i++) {
+            styleBoxes[i].setEnabled(false);
+        }
+
         // build track panel dynamically
         centerWrapper.removeAll();
         JPanel trackPanel = new JPanel(new GridLayout(activeTypists, 1));
@@ -302,6 +320,10 @@ public class GUITypingRace
         autoCorrectBox.setEnabled(true);
         caffeineBox.setEnabled(true);
         nightShiftBox.setEnabled(true);
+
+        for(int i=0; i<6; i++) {
+            styleBoxes[i].setEnabled(true);
+        }
     }
     
     /**
