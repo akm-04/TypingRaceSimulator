@@ -29,6 +29,12 @@ public class GUITypingRace
     public static final String STYLE_3 = "Phone Thumbs";
     public static final String STYLE_4 = "Voice-to-Text";
 
+    // Keyboard Styles
+    public static final String KB_1 = "Membrane";
+    public static final String KB_2 = "Mechanical";
+    public static final String KB_3 = "Touchscreen";
+    public static final String KB_4 = "Stenography";
+
     private String currentPassage;
     private JRadioButton shortBtn, midBtn, longBtn, customBtn;
     private JTextField customInputField;
@@ -50,6 +56,11 @@ public class GUITypingRace
     // Typist Configuration
     private JComboBox<String>[] styleBoxes;
     private JLabel[] styleImpactLabels; // array holds descriptions for GUI
+
+    // Keyboard configs
+    private JComboBox<String>[] keyboardBoxes;
+    private JLabel[] keyboardImpactLabels;
+
     /**
      * Constructor for objects of class TypingRace.
      * Sets up the race with a passage of the given length.
@@ -134,15 +145,23 @@ public class GUITypingRace
 
         // Tab-2 = setup Typist
         JTabbedPane typistTab = new JTabbedPane();
+
         styleBoxes = new JComboBox[6];
         styleImpactLabels = new JLabel[6];
+
+        keyboardBoxes = new JComboBox[6];
+        keyboardImpactLabels = new JLabel[6];
+
         String[] styles = {STYLE_1, STYLE_2, STYLE_3, STYLE_4};
+        String[] keyboards = {KB_1, KB_2, KB_3, KB_4};
+
         JPanel[] playerPanels = new JPanel[6]; // array to hold panels. Add/ remove panels using changelistener
 
         for (int i = 0; i < 6; i++) {
             JPanel playerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             playerPanels[i] = playerPanel;
 
+            // Typist Style
             playerPanel.add(new JLabel("Typing Style:"));
             styleBoxes[i] = new JComboBox<>(styles);
             playerPanel.add(styleBoxes[i]);
@@ -152,7 +171,17 @@ public class GUITypingRace
             styleImpactLabels[i].setForeground(Color.GRAY);
             playerPanel.add(styleImpactLabels[i]);
 
+            // Keyboard Setup
+            playerPanel.add(new JLabel("   |   Keyboard:"));
+            keyboardBoxes[i] = new JComboBox<>(keyboards);
+            playerPanel.add(keyboardBoxes[i]);
+
+            keyboardImpactLabels[i] = new JLabel(" (Standard Speed & Mistypes)");
+            keyboardImpactLabels[i].setForeground(Color.GRAY);
+            playerPanel.add(keyboardImpactLabels[i]);
+
             int seatIndex = i;
+            // Typist Style Descriptions
             styleBoxes[i].addActionListener(e -> {
                 String selected = (String) styleBoxes[seatIndex].getSelectedItem();
                 if (STYLE_1.equals(selected)) {
@@ -163,6 +192,20 @@ public class GUITypingRace
                     styleImpactLabels[seatIndex].setText(" (Double Mistype Chance)");
                 } else if (STYLE_4.equals(selected)) {
                     styleImpactLabels[seatIndex].setText(" (Locked 95% Accuracy, 0 Burnout)");
+                }
+            });
+
+            // Keyboard Type Descriptions
+            keyboardBoxes[i].addActionListener(e -> {
+                String selectedKey = (String) keyboardBoxes[seatIndex].getSelectedItem();
+                if (KB_1.equals(selectedKey)) {
+                    keyboardImpactLabels[seatIndex].setText(" (Normal Speed & Mistypes)");
+                } else if (KB_2.equals(selectedKey)) {
+                    keyboardImpactLabels[seatIndex].setText(" (+5% Speed, Less Mistypes)");
+                } else if (KB_3.equals(selectedKey)) {
+                    keyboardImpactLabels[seatIndex].setText(" (-5% Speed, More Mistypes)");
+                } else if (KB_4.equals(selectedKey)) {
+                    keyboardImpactLabels[seatIndex].setText(" (+30% Speed, High Mistype Risk)");
                 }
             });
 
