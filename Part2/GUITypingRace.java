@@ -243,7 +243,8 @@ public class GUITypingRace
                 currentTurn++; // Track cafferin count
 
                 for (int i = 0; i < activeTypists; i++) {
-                    advanceTypist(typists[i]);
+                    // Pass on seat number so advanceTypist can apply buff/de-buff
+                    advanceTypist(typists[i], i);
                     if (raceFinishedBy(typists[i])) {
                         someoneFinished = true;
                     }
@@ -371,7 +372,7 @@ public class GUITypingRace
      *
      * @param theTypist the typist to advance
      */
-    private void advanceTypist(Typist theTypist)
+    private void advanceTypist(Typist theTypist, int seat)
     {
         if (theTypist.isBurntOut())
         {
@@ -380,7 +381,38 @@ public class GUITypingRace
             return;
         }
 
+        /* Reminder of what each does;;
+        * MISTYPE_BASE_CHANCE : factor used to calculate if a typist makes a typo
+        * If a typist has 80% accuracy (0.80), their chance to miss is 20% (0.20).
+        *
+        * burnoutMultiplier: risk of a typist crashing from typing too fast.
+        * if 0.05, it means a 100% accurate typist has exactly a 5% chance to burn out every turn.
+        *
+        * SLIDE_BACK_AMOUNT: how many characters a typist is dragged backwards when they trigger a mistype.
+        *
+        */
+        // Buffs / Debuffs features
         double realAccuracy = theTypist.getAccuracy();
+        double burnoutMultiplier = 0.05;
+        double mistypeMultiplier = MISTYPE_BASE_CHANCE;
+
+        String selectedStyle = (String) styleBoxes[seat].getSelectedItem();
+
+        if ("Touch Typist".equals(selectedStyle)) {
+            realAccuracy += 0.15;      // Very fast
+            burnoutMultiplier *= 2.0;  // High burnout risk
+        } 
+        else if ("Hunt & Peck".equals(selectedStyle)) {
+            realAccuracy -= 0.20;      // Very slow typing rate
+            burnoutMultiplier *= 0.1;  // Never burns out
+        } 
+        else if ("Phone Thumbs".equals(selectedStyle)) {
+            mistypeMultiplier = 0.6;   // Increased mistype chances
+        } 
+        else if ("Voice-to-Text".equals(selectedStyle)) {
+            realAccuracy = 0.80;       // accuracy fixed (as voice)
+            burnoutMultiplier = 0.0;   // Never burns out as not typing.
+        }
 
         if (isNightShift) {
             realAccuracy -= 0.15;
@@ -405,7 +437,7 @@ public class GUITypingRace
 
         // Mistype check — the probability should reflect the typist's accuracy
         // Higher accuracy = lower chance of mistyping and vice versa
-        if (Math.random() < (1.0 - realAccuracy) * MISTYPE_BASE_CHANCE)
+        if (Math.random() < (1.0 - realAccuracy) * mistypeMultiplier)
         {
             int tmp = SLIDE_BACK_AMOUNT;
             if (isAutocorrect) {
@@ -414,7 +446,6 @@ public class GUITypingRace
             theTypist.slideBack(tmp);
         }
 
-        double burnoutMultiplier = 0.05;
         if (isCaffeine && currentTurn > 10) {
             burnoutMultiplier = 0.12;
         }
