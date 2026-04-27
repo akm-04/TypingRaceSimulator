@@ -22,7 +22,13 @@ public class GUITypingRace
     private static final String SHORT_TEXT = "The quick brown fox jumps over the lazy dog to win the short typing race.";
     private static final String MID_TEXT = "Object-oriented programming allows developers to structure software around data, or objects, rather than just using functions and logic.";
     private static final String LONG_TEXT = "Java Swing is a lightweight graphical user interface toolkit that includes a rich set of widgets. It is part of the Java Foundation Classes and provides a native look and feel across different operating systems.";
-    
+
+    // Typing Styles
+    public static final String STYLE_1 = "Touch Typist";
+    public static final String STYLE_2 = "Hunt & Peck";
+    public static final String STYLE_3 = "Phone Thumbs";
+    public static final String STYLE_4 = "Voice-to-Text";
+
     private String currentPassage;
     private JRadioButton shortBtn, midBtn, longBtn, customBtn;
     private JTextField customInputField;
@@ -130,7 +136,7 @@ public class GUITypingRace
         JTabbedPane typistTab = new JTabbedPane();
         styleBoxes = new JComboBox[6];
         styleImpactLabels = new JLabel[6];
-        String[] styles = {"Touch Typist", "Hunt & Peck", "Phone Thumbs", "Voice-to-Text"};
+        String[] styles = {STYLE_1, STYLE_2, STYLE_3, STYLE_4};
         JPanel[] playerPanels = new JPanel[6]; // array to hold panels. Add/ remove panels using changelistener
 
         for (int i = 0; i < 6; i++) {
@@ -149,13 +155,13 @@ public class GUITypingRace
             int seatIndex = i;
             styleBoxes[i].addActionListener(e -> {
                 String selected = (String) styleBoxes[seatIndex].getSelectedItem();
-                if ("Touch Typist".equals(selected)) {
+                if (STYLE_1.equals(selected)) {
                     styleImpactLabels[seatIndex].setText(" (+15% Accuracy, Double Burnout Risk)");
-                } else if ("Hunt & Peck".equals(selected)) {
+                } else if (STYLE_2.equals(selected)) {
                     styleImpactLabels[seatIndex].setText(" (-20% Accuracy, Almost No Burnout)");
-                } else if ("Phone Thumbs".equals(selected)) {
+                } else if (STYLE_3.equals(selected)) {
                     styleImpactLabels[seatIndex].setText(" (Double Mistype Chance)");
-                } else if ("Voice-to-Text".equals(selected)) {
+                } else if (STYLE_4.equals(selected)) {
                     styleImpactLabels[seatIndex].setText(" (Locked 95% Accuracy, 0 Burnout)");
                 }
             });
@@ -434,18 +440,18 @@ public class GUITypingRace
 
         String selectedStyle = (String) styleBoxes[seat].getSelectedItem();
 
-        if ("Touch Typist".equals(selectedStyle)) {
+        if (STYLE_1.equals(selectedStyle)) {
             realAccuracy += 0.15;      // Very fast
             burnoutMultiplier *= 2.0;  // High burnout risk
         } 
-        else if ("Hunt & Peck".equals(selectedStyle)) {
+        else if (STYLE_2.equals(selectedStyle)) {
             realAccuracy -= 0.20;      // Very slow typing rate
             burnoutMultiplier *= 0.1;  // Never burns out
         } 
-        else if ("Phone Thumbs".equals(selectedStyle)) {
+        else if (STYLE_3.equals(selectedStyle)) {
             mistypeMultiplier = 0.6;   // Increased mistype chances
         } 
-        else if ("Voice-to-Text".equals(selectedStyle)) {
+        else if (STYLE_4.equals(selectedStyle)) {
             realAccuracy = 0.80;       // accuracy fixed (as voice)
             burnoutMultiplier = 0.0;   // Never burns out as not typing.
         }
