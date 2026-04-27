@@ -37,6 +37,13 @@ public class GUITypingRace
     public static final String KB_3 = "Touchscreen";
     public static final String KB_4 = "Stenography";
 
+    // set color for each player
+    public static final String COL_BLACK   = "Black";
+    public static final String COL_BLUE    = "Blue";
+    public static final String COL_GREEN   = "Green";
+    public static final String COL_MAGENTA = "Magenta";
+    public static final String COL_ORANGE  = "Orange";
+
     private String currentPassage;
     private JRadioButton shortBtn, midBtn, longBtn, customBtn;
     private JTextField customInputField;
@@ -65,6 +72,10 @@ public class GUITypingRace
     // Keyboard configs
     private JComboBox<String>[] keyboardBoxes;
     private JLabel[] keyboardImpactLabels;
+
+    // symbol and colour configs
+    private JTextField[] symbolFields;
+    private JComboBox<String>[] colorBoxes;
 
     /**
      * Constructor for objects of class TypingRace.
@@ -157,8 +168,12 @@ public class GUITypingRace
         keyboardBoxes = new JComboBox[6];
         keyboardImpactLabels = new JLabel[6];
 
+        symbolFields = new JTextField[6];
+        colorBoxes = new JComboBox[6];
+
         String[] styles = {STYLE_1, STYLE_2, STYLE_3, STYLE_4};
         String[] keyboards = {KB_1, KB_2, KB_3, KB_4};
+        String[] colors = {COL_BLACK, COL_BLUE, COL_GREEN, COL_MAGENTA, COL_ORANGE};
 
         JPanel[] playerPanels = new JPanel[6]; // array to hold panels. Add/ remove panels using changelistener
 
@@ -184,6 +199,16 @@ public class GUITypingRace
             keyboardImpactLabels[i] = new JLabel(" (Standard Speed & Mistypes)");
             keyboardImpactLabels[i].setForeground(Color.GRAY);
             playerPanel.add(keyboardImpactLabels[i]);
+
+            // Color and symbol
+            playerPanel.add(new JLabel("   |   Symbol:"));
+            // unicode trick to change default symbol with player number
+            symbolFields[i] = new JTextField(String.valueOf((char)('①' + i)), 2); 
+            playerPanel.add(symbolFields[i]);
+
+            playerPanel.add(new JLabel(" Color:"));
+            colorBoxes[i] = new JComboBox<>(colors);
+            playerPanel.add(colorBoxes[i]);
 
             int seatIndex = i;
             // Typist Style Descriptions
@@ -265,6 +290,8 @@ public class GUITypingRace
         for (int i = 0; i < 6; i++) {
             configControls.add(styleBoxes[i]);
             configControls.add(keyboardBoxes[i]);
+            configControls.add(symbolFields[i]);
+            configControls.add(colorBoxes[i]);
         }
 
         frame.setVisible(true);
@@ -316,7 +343,14 @@ public class GUITypingRace
             typists[i].resetToStart();
             
             JPanel lane = new JPanel(new BorderLayout());
-            JLabel nameLabel = new JLabel(typists[i].getSymbol() + " " + typists[i].getName() + "  ");
+
+            // Fetch custom symbol. Fallback to default if left blank
+            String customSymbol = symbolFields[i].getText().trim();
+            if (customSymbol.isEmpty()) {
+                customSymbol = String.valueOf(typists[i].getSymbol());
+            }
+
+            JLabel nameLabel = new JLabel(customSymbol + " " + typists[i].getName() + "  ");
             
             typingFields[i] = new JTextField("");
             typingFields[i].setEditable(false);
@@ -357,6 +391,29 @@ public class GUITypingRace
         gameTimer.start(); 
     }
 
+    // Helper method used by updateScreen to fetch chosen color
+    private Color getSelectedColor(int seatIndex) {
+        String col = (String) colorBoxes[seatIndex].getSelectedItem();
+
+        if (COL_BLUE.equals(col)) {
+            return Color.BLUE;
+        }
+
+        if (COL_GREEN.equals(col)) {
+            return Color.GREEN;
+        }
+
+        if (COL_MAGENTA.equals(col)) {
+            return Color.MAGENTA;
+        }
+
+        if (COL_ORANGE.equals(col)) {
+            return Color.ORANGE;
+        }
+
+        return Color.BLACK;
+    }
+
     // Handle GUI Updates
     private void updateScreen() 
     {
@@ -378,7 +435,7 @@ public class GUITypingRace
             } else {
                 typingFields[i].setText(typedSoFar);
                 typingFields[i].setBackground(Color.WHITE);
-                typingFields[i].setForeground(Color.BLACK);
+                typingFields[i].setForeground(getSelectedColor(i));
             }
         }
     }
