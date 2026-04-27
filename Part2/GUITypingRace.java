@@ -19,12 +19,19 @@ public class GUITypingRace
     private static final int    SLIDE_BACK_AMOUNT   = 2;
     private static final int    BURNOUT_DURATION     = 3;
 
+    // Pre-defined String.-
+    private static final String SHORT_TEXT = "The quick brown fox jumps over the lazy dog to win the short typing race.";
+    private static final String MID_TEXT = "Object-oriented programming allows developers to structure software around data, or objects, rather than just using functions and logic.";
+    private static final String LONG_TEXT = "Java Swing is a lightweight graphical user interface toolkit that includes a rich set of widgets. It is part of the Java Foundation Classes and provides a native look and feel across different operating systems.";
+    
+    private String currentPassage;
+    private JRadioButton shortBtn, midBtn, longBtn;
+
     // GUI components
     private JFrame frame;
-    private JTextField lengthField;
+    private JTextField[] typingFields;
     private JButton startButton;
     private Timer gameTimer;
-    private JProgressBar[] progressBars;
 
     /**
      * Constructor for objects of class TypingRace.
@@ -51,18 +58,45 @@ public class GUITypingRace
         frame.setSize(1000, 700);
         frame.setLayout(new BorderLayout());
 
-        JPanel topPanel = new JPanel(new FlowLayout());
-        topPanel.add(new JLabel("Enter Passage Length:"));
+        // Top panel = setup tab
+        JTabbedPane tabbedPane = new JTabbedPane();
 
-        lengthField = new JTextField("40", 5);
-        topPanel.add(lengthField);
+        // tab-1: TypingRace setup
+        JPanel raceTab = new JPanel(new GridLayout(4, 1));
+        raceTab.add(new JLabel("Select Passage Length:", SwingConstants.CENTER));
 
-        frame.add(topPanel, BorderLayout.NORTH);
+        shortBtn = new JRadioButton("Short (70 chars)");
+        midBtn = new JRadioButton("Medium (140 chars)");
+        longBtn = new JRadioButton("Long (200 chars)");
+        midBtn.setSelected(true); // Default selection
 
-        // centre panel: Race Track
+        ButtonGroup lengthGroup = new ButtonGroup();
+        lengthGroup.add(shortBtn);
+        lengthGroup.add(midBtn);
+        lengthGroup.add(longBtn);
+
+        JPanel radioPanel1 = new JPanel(new FlowLayout());
+        radioPanel1.add(shortBtn);
+        JPanel radioPanel2 = new JPanel(new FlowLayout());
+        radioPanel2.add(midBtn);
+        JPanel radioPanel3 = new JPanel(new FlowLayout());
+        radioPanel3.add(longBtn);
+
+        raceTab.add(radioPanel1);
+        raceTab.add(radioPanel2);
+        raceTab.add(radioPanel3);
+
+        // Tab-2 = setup Typist
+        JPanel typistTab = new JPanel(new FlowLayout());
+        typistTab.add(new JLabel("Typist Player Options"));
+
+        tabbedPane.addTab("Main Race", raceTab);
+        tabbedPane.addTab("Typists", typistTab);
+        frame.add(tabbedPane, BorderLayout.NORTH);
+
+        // center panel = Race Track
         JPanel trackPanel = new JPanel(new GridLayout(3, 1));
-
-        progressBars = new JProgressBar[3];
+        typingFields = new JTextField[3];
         Typist[] seatedTypists = {seat1Typist, seat2Typist, seat3Typist};
 
         for (int i = 0; i < 3; i++) {
@@ -71,13 +105,13 @@ public class GUITypingRace
             // The Label showing the Typist's name and symbol
             JLabel nameLabel = new JLabel(seatedTypists[i].getSymbol() + " " + seatedTypists[i].getName() + "  ");
             
-            // The progress bar
-            progressBars[i] = new JProgressBar();
-            progressBars[i].setStringPainted(true);
-            progressBars[i].setString("Ready to start");
-
+            // Switch to JTextField
+            typingFields[i] = new JTextField("Waiting to start...");
+            typingFields[i].setEditable(false);
+            typingFields[i].setFont(new Font("Monospaced", Font.BOLD, 12));
+            
             lane.add(nameLabel, BorderLayout.WEST);
-            lane.add(progressBars[i], BorderLayout.CENTER);
+            lane.add(typingFields[i], BorderLayout.CENTER);
             trackPanel.add(lane);
         }
         
@@ -100,24 +134,31 @@ public class GUITypingRace
     private void runRace() 
     {
 
-        try {
-            passageLength = Integer.parseInt(lengthField.getText());
-            if (passageLength <= 0) passageLength = 40;
-        } catch (NumberFormatException e) {
-            passageLength = 40;
-            lengthField.setText("40"); // Reset if they typed letters
+        // set length according to chosen radio
+        if (shortBtn.isSelected()) {
+            currentPassage = SHORT_TEXT;
+        } else if (midBtn.isSelected()) {
+            currentPassage = MID_TEXT;
+        } else if (longBtn.isSelected()) {
+            currentPassage = LONG_TEXT;
         }
-        for (int i = 0; i < 3; i++) {
-            progressBars[i].setMaximum(passageLength);
-        }
+
+        passageLength = currentPassage.length();
 
         // Lock the inputs so user cannot interrupt game mid-race
         startButton.setEnabled(false);
-        lengthField.setEditable(false);
+        shortBtn.setEnabled(false);
+        midBtn.setEnabled(false);
+        longBtn.setEnabled(false);;
         
         seat1Typist.resetToStart();
         seat2Typist.resetToStart();
         seat3Typist.resetToStart();
+
+        for(int i = 0; i < 3; i++) {
+            typingFields[i].setText("");
+            typingFields[i].setBackground(Color.WHITE);
+        }
 
         // Inner class to handle the Timer ticks cleanly
         gameTimer = new Timer(150, new ActionListener() {
@@ -145,14 +186,22 @@ public class GUITypingRace
         
         for (int i = 0; i < 3; i++) {
             Typist t = seatedTypists[i];
-            progressBars[i].setValue(t.getProgress());
-            
+
+            int p = t.getProgress();
+            if (p < 0) p = 0;
+            if (p > currentPassage.length()) p = currentPassage.length();
+
+            // Get the portion of the text they have successfully typed
+            String typedSoFar = currentPassage.substring(0, p);
+
             if (t.isBurntOut()) {
-                progressBars[i].setString("BURNT OUT (" + t.getBurnoutTurnsRemaining() + " turns)");
-                progressBars[i].setForeground(Color.RED); 
+                typingFields[i].setText("BURNT OUT! " + typedSoFar);
+                typingFields[i].setBackground(Color.RED);
+                typingFields[i].setForeground(Color.WHITE);
             } else {
-                progressBars[i].setString(t.getProgress() + " / " + passageLength);
-                progressBars[i].setForeground(UIManager.getColor("ProgressBar.foreground")); 
+                typingFields[i].setText(typedSoFar);
+                typingFields[i].setBackground(Color.WHITE);
+                typingFields[i].setForeground(Color.BLACK);
             }
         }
     }
