@@ -63,6 +63,9 @@ public class GUITypingRace
     private JSlider seatSlider;
     private JPanel centerWrapper;
 
+    private double raceStartTime;
+    private int[] currentRaceBurnouts = new int[6];
+
     // Update to use a list to lock / unlock GUI configs
     private List<JComponent> configControls = new ArrayList<>();
 
@@ -423,6 +426,12 @@ public class GUITypingRace
             }
         });
 
+        // Reset burnouts and start the clock for calculations
+        for (int i = 0; i < 6; i++) {
+            currentRaceBurnouts[i] = 0;
+        }
+        raceStartTime = System.currentTimeMillis();
+
         gameTimer.start(); 
     }
 
@@ -480,6 +489,10 @@ public class GUITypingRace
      */
     private void declareWinner()
     {
+        // calculate time for the race
+        double endTime = System.currentTimeMillis();
+        double minutesTaken = (endTime - raceStartTime) / 60000;
+
         // winner = most progress
         Typist winner = typists[0];
         for (int i = 1; i < activeTypists; i++) {
@@ -497,6 +510,28 @@ public class GUITypingRace
         
         JOptionPane.showMessageDialog(frame, message, "Race Finished", JOptionPane.INFORMATION_MESSAGE);
 
+        // package all data
+        Object[][] raceResults = new Object[activeTypists][5];
+        
+        for (int i = 0; i < activeTypists; i++) {
+            Typist t = typists[i];
+            
+            // WPM = (Total Typed Characters / 5) / Minutes Taken. Rounded to 1 decimal.
+            // For simplicity, I am assuming each word is 5 chars long
+            double wpm = Math.round(((t.getProgress() / 5.0) / minutesTaken) * 10.0) / 10.0;
+            
+            raceResults[i][0] = t.getName();
+            raceResults[i][1] = wpm; 
+            raceResults[i][2] = (int) Math.round(t.getAccuracy() * 100); 
+            raceResults[i][3] = currentRaceBurnouts[i]; 
+
+            // Point system will be used later for leaderboard
+            if (t == winner) {
+                raceResults[i][4] = 3;
+            } else {
+                raceResults[i][4] = 0;
+            }
+        }
         lastRaceResults = raceResults;
         // Open window when race finishes
         new statsGUI(frame, lastRaceResults).setVisible(true);
@@ -672,6 +707,8 @@ public class GUITypingRace
                 currentBurnoutDuration = 1;
             }
 
+            // Track burnout for stats
+            currentRaceBurnouts[seat]++;
             theTypist.burnOut(currentBurnoutDuration);
         }
     }
