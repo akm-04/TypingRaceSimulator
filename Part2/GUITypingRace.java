@@ -57,6 +57,7 @@ public class GUITypingRace
     private JFrame frame;
     private JTextField[] typingFields;
     private JButton startButton;
+    private JButton statsButton;
     private Timer gameTimer;
 
     private JSlider seatSlider;
@@ -68,6 +69,7 @@ public class GUITypingRace
     // Typist Configuration
     private JComboBox<String>[] styleBoxes;
     private JLabel[] styleImpactLabels; // array holds descriptions for GUI
+    private Object[][] lastRaceResults = null; // Remember last race
 
     // Keyboard configs
     private JComboBox<String>[] keyboardBoxes;
@@ -297,10 +299,14 @@ public class GUITypingRace
         JPanel bottomPanel = new JPanel(new FlowLayout());
         startButton = new JButton("Start Race");
         bottomPanel.add(startButton);
+        statsButton = new JButton("View Stats");
+        bottomPanel.add(statsButton);
         frame.add(bottomPanel, BorderLayout.SOUTH);
         
         // Wire it up
         startButton.addActionListener(e -> runRace());
+
+        statsButton.addActionListener(e -> new statsGUI(frame, lastRaceResults).setVisible(true));
 
         // Add settings to list to Lock during race and unlock automatically afterwards
         configControls.add(startButton);
@@ -490,6 +496,10 @@ public class GUITypingRace
             winner.getName(), winner.getAccuracy(), oldAccuracy);
         
         JOptionPane.showMessageDialog(frame, message, "Race Finished", JOptionPane.INFORMATION_MESSAGE);
+
+        lastRaceResults = raceResults;
+        // Open window when race finishes
+        new statsGUI(frame, lastRaceResults).setVisible(true);
 
         startButton.setText("Restart Race");
 
