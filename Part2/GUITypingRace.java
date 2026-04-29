@@ -640,6 +640,7 @@ public class GUITypingRace
         */
         // Buffs / Debuffs features
         double realAccuracy = theTypist.getAccuracy();
+        // Note if burnoutMultiplier is changed, caffein mode's value must also be adjusted
         double burnoutMultiplier = 0.05;
         double mistypeMultiplier = MISTYPE_BASE_CHANCE;
 
@@ -724,7 +725,8 @@ public class GUITypingRace
         }
 
         if (isCaffeine && currentTurn > 10) {
-            burnoutMultiplier = 0.12;
+            // Multiply by 2.4 to raise base burnout multiplier0.05 to 0.12,
+            burnoutMultiplier *= 2.4;
         }
 
         // Burnout check — pushing too hard increases burnout risk
