@@ -547,15 +547,8 @@ public class GUITypingRace
             int burnouts = currentRaceBurnouts[i];
             int position = rankedTypists.indexOf(t) + 1;
 
-            // Dont just assign points to 1st position, but also to 2nd and 3rd position
-            int points = 0;
-            if (position == 1) {
-                points = 3;
-            } else if (position == 2) {
-                points = 2;
-            } else if (position == 3) {
-                points = 1;
-            }
+            // Let dedicated method handle point assignment
+            int points = assignPoints(position, wpm, burnouts);
 
             // Save race history
             fileManagement.saveRaceRecord(t.getName(), position, wpm, accuracyInt, burnouts, points);
@@ -578,6 +571,39 @@ public class GUITypingRace
         for (JComponent config : configControls) {
             config.setEnabled(true);
         }
+    }
+
+    /* Method that decides what points to assign to players based on set criterias */
+    private int assignPoints(int position, double wpm, int burnouts) {
+        /* Set criteria for point
+        * 1st position = 10pt
+        * 2nd position = 7pt
+        * 3rd position = 5pt
+        * all participants get 2pt
+        * 1 burnout = -2pt
+        * For each 5 WPM = 1pt
+        */
+        int points = 0;
+
+        if (position == 1) {
+            points = 10;
+        } else if (position == 2) {
+            points = 7;
+        } else if (position == 3) {
+            points = 5;
+        } else {
+            points = 2;
+        }
+
+        points += (int) (wpm / 5.0);
+        points -= (burnouts * 2);
+
+        // Points cannot be negative
+        if (points < 0) {
+            points = 0;
+        }
+
+        return points;
     }
     
     /**
