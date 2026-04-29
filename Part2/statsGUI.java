@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import javax.swing.table.DefaultTableModel;
+import java.util.List;
 
 public class statsGUI extends JDialog {
     
@@ -9,6 +11,7 @@ public class statsGUI extends JDialog {
         setSize(800, 500);
         setLocationRelativeTo(parent);
         
+        // Tab 1 | Show current race result
         JTabbedPane tabs = new JTabbedPane();
         
         JPanel currentTab = new JPanel(new BorderLayout());
@@ -28,7 +31,48 @@ public class statsGUI extends JDialog {
             currentTab.add(new JLabel("Run race to see stats!", SwingConstants.CENTER));
         }
         
+
+        // Tab-2 | Show historical data
+        JPanel historyTab = new JPanel(new BorderLayout());
+
+        String[] uniqueTypists = fileManagement.getUniqueTypists();
+        
+        if (uniqueTypists.length == 0) {
+            // If file empty / no data
+            historyTab.add(new JLabel("No historical data available. Run a race to see history", SwingConstants.CENTER));
+        } else {
+
+            JPanel topBar = new JPanel();
+            JComboBox<String> typistDropdown = new JComboBox<>(uniqueTypists);
+
+            topBar.add(new JLabel("Select Typist: "));
+            topBar.add(typistDropdown);
+            historyTab.add(topBar, BorderLayout.NORTH);
+            
+            String[] histCols = {"Race No", "Finish Position", "WPM", "Accuracy", "Burnouts", "Points Earned"};
+            DefaultTableModel histModel = new DefaultTableModel(histCols, 0);
+            JTable histTable = new JTable(histModel);
+            histTable.setEnabled(false);
+            histTable.setRowHeight(30);
+            historyTab.add(new JScrollPane(histTable), BorderLayout.CENTER);
+            
+            // When user picks a name, load their history from the CSV
+            typistDropdown.addActionListener(e -> {
+                histModel.setRowCount(0); // Clear table
+
+                String selected = (String) typistDropdown.getSelectedItem();
+
+                List<Object[]> historyData = fileManagement.getHistoryForTypist(selected);
+                for (Object[] row : historyData) {
+                    histModel.addRow(row);
+                }
+            });
+            // Initially show data for first typist
+            typistDropdown.setSelectedIndex(0);
+        }
+
         tabs.addTab("Current Race Results", currentTab);
+        tabs.addTab("Historical Data", historyTab);
         add(tabs);
     }
 }
