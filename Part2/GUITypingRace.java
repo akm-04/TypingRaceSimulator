@@ -58,6 +58,7 @@ public class GUITypingRace
     private JTextField[] typingFields;
     private JButton startButton;
     private JButton statsButton;
+    private JButton leaderboardButton;
     private Timer gameTimer;
 
     private JSlider seatSlider;
@@ -304,12 +305,16 @@ public class GUITypingRace
         bottomPanel.add(startButton);
         statsButton = new JButton("View Stats");
         bottomPanel.add(statsButton);
+        leaderboardButton = new JButton("Leaderboard");
+        bottomPanel.add(leaderboardButton);
         frame.add(bottomPanel, BorderLayout.SOUTH);
         
         // Wire it up
         startButton.addActionListener(e -> runRace());
 
         statsButton.addActionListener(e -> new statsGUI(frame, lastRaceResults).setVisible(true));
+
+        leaderboardButton.addActionListener(e -> new leaderboardGUI(frame).setVisible(true));
 
         // Add settings to list to Lock during race and unlock automatically afterwards
         configControls.add(startButton);
@@ -323,6 +328,7 @@ public class GUITypingRace
         configControls.add(caffeineBox);
         configControls.add(nightShiftBox);
         configControls.add(statsButton);
+        configControls.add(leaderboardButton);
         for (int i = 0; i < 6; i++) {
             configControls.add(styleBoxes[i]);
             configControls.add(keyboardBoxes[i]);
