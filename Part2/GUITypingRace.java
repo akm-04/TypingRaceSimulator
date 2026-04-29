@@ -494,13 +494,17 @@ public class GUITypingRace
         double minutesTaken = (endTime - raceStartTime) / 60000;
 
         // winner = most progress
-        Typist winner = typists[0];
-        for (int i = 1; i < activeTypists; i++) {
-            if (typists[i].getProgress() > winner.getProgress()) {
-                winner = typists[i];
-            }
+        List<Typist> rankedTypists = new ArrayList<>();
+        for (int i = 0; i < activeTypists; i++) {
+            rankedTypists.add(typists[i]);
         }
 
+        // Sort typist in the list in order of progression
+        rankedTypists.sort((a, b) -> Integer.compare(b.getProgress(), a.getProgress()));
+
+        // Note rankedTypist is already sorted by progress. so first one is the winner
+        Typist winner = rankedTypists.get(0);
+        // Deal with winner data
         double oldAccuracy = winner.getAccuracy();
         winner.setAccuracy(oldAccuracy + 0.02);
 
@@ -511,7 +515,19 @@ public class GUITypingRace
         JOptionPane.showMessageDialog(frame, message, "Race Finished", JOptionPane.INFORMATION_MESSAGE);
 
         // package all data
-        Object[][] raceResults = new Object[activeTypists][5];
+        Object[][] raceResults = new Object[activeTypists][6];
+        
+        /* ===== raceResult object Description =====
+        * Reminder of raceResults fields
+        * raceResult[a][x] :: a is always typist number.
+        * x could be anywhere between 0-5
+        * 0 : name of the typist
+        * 1 : Words per minuite for the race
+        * 2 : Accuracy for the race
+        * 3 : Total burnout for the race
+        * 4 : points of the typist
+        * 5 : Personal best Words per minuite pulled from fileManagement -> getPersonalBestWPM method
+        */
         
         for (int i = 0; i < activeTypists; i++) {
             Typist t = typists[i];
@@ -520,17 +536,30 @@ public class GUITypingRace
             // For simplicity, I am assuming each word is 5 chars long
             double wpm = Math.round(((t.getProgress() / 5.0) / minutesTaken) * 10.0) / 10.0;
             
+            int accuracyInt = (int) Math.round(t.getAccuracy() * 100);
+            int burnouts = currentRaceBurnouts[i];
+            int position = rankedTypists.indexOf(t) + 1;
+
+            // Dont just assign points to 1st position, but also to 2nd and 3rd position
+            int points = 0;
+            if (position == 1) {
+                points = 3;
+            } else if (position == 2) {
+                points = 2;
+            } else if (position == 3) {
+                points = 1;
+            }
+
+            // Save race history
+            fileManagement.saveRaceRecord(t.getName(), position, wpm, accuracyInt, burnouts, points);
+            
             raceResults[i][0] = t.getName();
             raceResults[i][1] = wpm; 
             raceResults[i][2] = (int) Math.round(t.getAccuracy() * 100); 
             raceResults[i][3] = currentRaceBurnouts[i]; 
+            raceResults[i][4] = points;
+            raceResults[i][5] = fileManagement.getPersonalBestWPM(t.getName());
 
-            // Point system will be used later for leaderboard
-            if (t == winner) {
-                raceResults[i][4] = 3;
-            } else {
-                raceResults[i][4] = 0;
-            }
         }
         lastRaceResults = raceResults;
         // Open window when race finishes
