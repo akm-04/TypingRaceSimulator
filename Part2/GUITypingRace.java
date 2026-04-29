@@ -322,6 +322,7 @@ public class GUITypingRace
         configControls.add(autoCorrectBox);
         configControls.add(caffeineBox);
         configControls.add(nightShiftBox);
+        configControls.add(statsButton);
         for (int i = 0; i < 6; i++) {
             configControls.add(styleBoxes[i]);
             configControls.add(keyboardBoxes[i]);
